@@ -1,0 +1,28 @@
+<%- include('header') %>
+
+<div class="container d-flex justify-content-center align-items-center">
+    <div class="card shadow p-4" style="width: 100%; max-width: 400px; border-radius: 12px;">
+        <h3 class="text-center mb-4">Enter The Game Room</h3> 
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="name" placeholder="Your Name">
+            <label for="name">Name</label>
+        </div>
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="room" placeholder="Create a New Room">
+            <label for="room">New Room</label>
+        </div>
+        <div class="form-floating mb-5">
+            <select class="form-select" id="rooms" aria-label="Join Existing Room">
+                <option value="" selected>Join an Existing Room</option>
+                <!-- Dynamic room options will be inserted here -->
+            </select>
+            <label for="rooms">Select Room</label>
+        </div>
+        <button class="btn btn-primary w-100" id="join">Let's jump into it!</button>
+    </div>
+</div>
+
+<script src="./socket.io/socket.io.js"></script>
+<script src="../Assets/js/join.js"></script>
+
+<%- include('footer') %>

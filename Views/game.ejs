@@ -1,0 +1,43 @@
+<%- include('header') %>
+
+<div class="d-flex" style="height: 50vh; gap: 30px;">
+    <!-- Kvíz kártya -->
+    <div class="card flex-grow-1" style="display: flex; flex-direction: column;">
+        <h3>Üdvözlünk a kvízben!</h3>
+
+        <!-- Kérdés megjelenítése -->
+        <div class="mt-4">
+            <h4 id="question" class="p-4 rounded" style="background: rgba(255, 255, 255, 0.1); color: #ffffff;">
+                A kérdés szövege itt fog megjelenni...
+            </h4>
+        </div>
+
+        <!-- Új válasz beküldése -->
+        <div class="mt-4">
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="newAnswer" placeholder="Írd be a válaszod!">
+                <label for="newAnswer">Írd be a válaszod!</label>
+            </div>
+            <button class="btn w-100" id="submitAnswerBtn" style="background: linear-gradient(90deg, #007bff, #0056b3); color: #ffffff;">Beküld</button>
+        </div>
+
+        <div class="mt-auto text-center">
+            <a href="/" class="btn btn-danger" id="exitQuizBtn" style="padding: 10px 20px; font-weight: bold;">Kilépés a kvízből</a>
+        </div>
+    </div>
+
+    <!-- Játékosok panel -->
+    <div class="players-panel">
+        <h5>Játékosok</h5>
+        <ul id="playerList">
+            <!-- Dinamikusan generált játékos nevek -->
+        </ul>
+    </div>
+    
+</div>
+
+<%- include('footer') %>
+<script src="../Assets/js/game.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+
+    
