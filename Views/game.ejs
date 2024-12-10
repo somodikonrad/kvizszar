@@ -3,7 +3,7 @@
 <div class="d-flex" style="height: 50vh; gap: 30px;">
     <!-- Kvíz kártya -->
     <div class="card flex-grow-1" style="display: flex; flex-direction: column;">
-        <h3>Üdvözlünk a kvízben!</h3>
+        <h3>Üdvözlünk a kvízben <%- user %>!</h3>
 
         <!-- Kérdés megjelenítése -->
         <div class="mt-4">
@@ -36,8 +36,8 @@
     
 </div>
 
-<%- include('footer') %>
-<script src="../Assets/js/game.js"></script>
 <script src="/socket.io/socket.io.js"></script>
+<script src="../../Assets/js/game.js"></script>
+<%- include('footer') %>
 
     

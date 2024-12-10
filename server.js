@@ -11,8 +11,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const coreRoutes = require('./Modules/core');
+const { users, rooms, userJoin, userLeave, getRoomUsers, getCurrentUser, inRoomsList, roomLeave } = require('./utils');
 
+const coreRoutes = require('./Modules/core');
 app.use('/', coreRoutes);
 
 // Szerver és Socket.IO beállítások
@@ -26,16 +27,6 @@ const pool = mysql.createPool({
     user: process.env.DBUSER,
     password: process.env.DBPASS,
     database: process.env.DBNAME
-});
-
-// Csatlakozás ellenőrzése
-pool.getConnection((err, connection) => {
-    if (err) {
-        console.log('Hiba a MySQL kapcsolódásakor: ' + err);
-    } else {
-        console.log('Sikeres csatlakozás a MySQL adatbázishoz.');
-        connection.release();
-    }
 });
 
 // Stílusok és statikus fájlok
@@ -68,7 +59,31 @@ app.get('/board', (req, res) => {
 
 // Socket.IO kapcsolat kezelése
 io.on('connection', (socket) => {
-    console.log('Egy felhasználó csatlakozott:', socket.id);
+    //console.log('Egy felhasználó csatlakozott:', socket.id);
+
+    socket.on('getRoomList', ()=>{
+        io.emit('updateRoomList', rooms)
+    });
+
+    socket.on('joinToChat', () => {
+        const roomUsers = getRoomUsers(session.room); // Lekérjük a szoba aktuális felhasználóit
+        if (roomUsers.length >= 5) {
+            // Ha a szoba már tele van, küldünk egy üzenetet az új felhasználónak, de nem csatlakoztatjuk
+            socket.emit('roomFull', 'The room is full, maximum 5 users allowed.');
+            return;
+        }else{
+            let user = userJoin(socket.id, session.user, session.room);
+            socket.join(session.room);
+            io.to(session.room).emit('updateRoomUsers', getRoomUsers(session.room));
+            io.to(session.user).emit('userConnected', user);
+        }
+        
+    
+        if (!inRoomsList(session.room)) {
+            rooms.push(session.room);
+            io.emit('updateRoomList', rooms);
+        }
+    });
 
     // Függvény a véletlenszerű kérdés lekérésére
     const getNewQuestion = () => {
@@ -97,7 +112,7 @@ io.on('connection', (socket) => {
 
     // Felhasználó lecsatlakozása esetén az időzítő törlése
     socket.on('disconnect', () => {
-        console.log('Egy felhasználó kilépett:', socket.id);
+        //console.log('Egy felhasználó kilépett:', socket.id);
         clearInterval(intervalId);
     });
 });
