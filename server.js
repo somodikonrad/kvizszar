@@ -67,23 +67,43 @@ io.on('connection', (socket) => {
 
     socket.on('joinToChat', () => {
         const roomUsers = getRoomUsers(session.room); // Lekérjük a szoba aktuális felhasználóit
-        if (roomUsers.length >= 5) {
-            // Ha a szoba már tele van, küldünk egy üzenetet az új felhasználónak, de nem csatlakoztatjuk
-            socket.emit('roomFull', 'The room is full, maximum 5 users allowed.');
+    
+        // Ellenőrizzük, hogy van-e már ugyanilyen nevű felhasználó a szobában
+        const duplicateUser = roomUsers.find(user => session.user.name === session.user);
+        if (duplicateUser) {
+            socket.emit('duplicateUser', {
+                message: 'A user with the same name already exists in the room.',
+                redirect: '/' // Az index.ejs oldalra irányít
+            });
             return;
-        }else{
+        }
+    
+        if (roomUsers.length >= 5) {
+            // Ha a szoba már tele van, küldünk egy üzenetet az új felhasználónak, majd visszairányítjuk
+            socket.emit('roomFull', {
+                message: 'The room is full, maximum 5 users allowed.',
+                redirect: '/' // Az index.ejs oldalra irányít
+            });
+            return;
+        } else {
+            // Normál csatlakozás, ha van hely a szobában
             let user = userJoin(socket.id, session.user, session.room);
             socket.join(session.room);
-            io.to(session.room).emit('updateRoomUsers', getRoomUsers(session.room));
-            io.to(session.user).emit('userConnected', user);
-        }
-        
     
-        if (!inRoomsList(session.room)) {
-            rooms.push(session.room);
-            io.emit('updateRoomList', rooms);
+            // Frissítjük a szoba állapotát
+            io.to(session.room).emit('updateRoomUsers', getRoomUsers(session.room));
+            io.to(session.room).emit('userConnected', user);
+    
+            // Ha a szoba még nincs a szobalistában, hozzáadjuk
+            if (!inRoomsList(session.room)) {
+                rooms.push(session.room);
+                io.emit('updateRoomList', rooms);
+            }
         }
     });
+    
+    
+    
 
     // Függvény a véletlenszerű kérdés lekérésére
     const getNewQuestion = () => {

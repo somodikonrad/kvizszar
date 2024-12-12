@@ -7,7 +7,7 @@
 
     const socket = io();
 
-    socket.emit('joinToChat');
+    socket.emit('joinToChat'), { roomName: document.getElementById('rooms') };
 
     socket.on('updateRoomUsers', (roomUsers)=>{
         playerList.innerHTML = '';
@@ -20,8 +20,14 @@
         });
     });
 
-    socket.on('roomFull', (message) => {
-        alert(message);
+    socket.on('roomFull', (data) => {
+        alert(data.message); // Megjeleníti a figyelmeztetést
+        window.location.href = data.redirect; // Visszairányít az index.ejs oldalra
+    });
+
+    socket.on('duplicateUser', (data) => {
+        alert(data.message); // Figyelmeztető üzenet a felhasználónak
+        window.location.href = data.redirect; // Visszairányítás az index oldalra
     });
 
 
