@@ -1,14 +1,14 @@
-    const newAnswerField = document.querySelector('#newAnswer');
+const newAnswerField = document.querySelector('#newAnswer');
     const submitAnswerBtn = document.querySelector('#submitAnswerBtn');
     const questionElement = document.querySelector('#question');
     const playerList = document.querySelector('#playerList');
     const exitQuizBtn = document.querySelector('#exitQuizBtn');
-
-
+ 
+ 
     const socket = io();
-
+ 
     socket.emit('joinToChat'), { roomName: document.getElementById('rooms') };
-
+ 
     socket.on('updateRoomUsers', (roomUsers)=>{
         playerList.innerHTML = '';
         let ul = document.createElement('ul');
@@ -19,23 +19,22 @@
             ul.appendChild(li);
         });
     });
-
+ 
     socket.on('roomFull', (data) => {
         alert(data.message); // Megjeleníti a figyelmeztetést
         window.location.href = data.redirect; // Visszairányít az index.ejs oldalra
     });
-
-    socket.on('duplicateUser', (data) => {
-        alert(data.message); // Figyelmeztető üzenet a felhasználónak
-        window.location.href = data.redirect; // Visszairányítás az index oldalra
+ 
+ 
+    socket.on('tenQuestion', (data) => {
+       
+        window.location.href = data.redirect; // Visszairányít az index.ejs oldalra
     });
-
-
     // Kérdés fogadása
     socket.on('newQuestion', (questionText) => {
         displayQuestion(questionText);
     });
-
+ 
     // Válasz beküldése
     submitAnswerBtn.addEventListener('click', sendAnswer);
     newAnswerField.addEventListener('keypress', (event) => {
@@ -43,7 +42,7 @@
             sendAnswer();
         }
     });
-
+ 
     function sendAnswer() {
         const answer = newAnswerField.value.trim();
         if (answer !== '') {
@@ -53,7 +52,12 @@
             alert('Kérlek, írj be egy választ!');
         }
     }
-
+   
+    socket.on('answerFeedback', (feedback) => {
+        alert(feedback);
+    });
+   
+ 
     function displayQuestion(questionText) {
         questionElement.textContent = questionText;
         questionElement.classList.add('question-appear');
@@ -61,9 +65,10 @@
             questionElement.classList.remove('question-appear');
         }, 800);
     }
-
+ 
     // Visszajelzés fogadása
     socket.on('answerFeedback', (feedback) => {
         alert(feedback);
     });
-
+ 
+ 
