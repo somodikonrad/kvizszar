@@ -94,9 +94,8 @@ io.on('connection', (socket) => {
     });
    
    
-    let questionCounter = 0;
-    let userScores = {};
- 
+    
+
     // Függvény a véletlenszerű kérdés lekérésére
     const getNewQuestion = () => {
         pool.query('SELECT * FROM questions ORDER BY RAND() LIMIT 1', (err, results) => {
@@ -105,32 +104,53 @@ io.on('connection', (socket) => {
                 socket.emit('newQuestion', 'Hiba történt a kérdés betöltése közben.');
                 return;
             }
- 
-            if (results.length > 0 ) {
- 
+
+            if (results.length > 0) {
                 if (questionCounter < 10) {
                     const question = results[0].question;
-                socket.emit('newQuestion', question);
-                questionCounter++;
+                    questionCounter++;
+
+                    // Küldjük el a kérdést és az időt
+                    socket.emit('newQuestion', {
+                        question: question,
+                        time: questionTime
+                    });
+
+                    let timeRemaining = questionTime;
+
+                    // Indítsunk visszaszámlálót
+                    const timer = setInterval(() => {
+                        if (timeRemaining > 0) {
+                            timeRemaining--;
+                            socket.emit('countdown', timeRemaining); // Frissítjük a visszaszámlálót
+                        } else {
+                            clearInterval(timer);
+                            if (questionCounter < 10) {
+                                getNewQuestion(); // Következő kérdés
+                            } else {
+                                socket.emit('tenQuestion', {
+                                    redirect: '/winner' // A nyertes oldalon való átirányítás
+                                });
+                            }
+                        }
+                    }, 1000);
                 }
-                else{ socket.emit('tenQuestion', {
-                   
-                    redirect: '/winner' // Az index.ejs oldalra irányít
-                });}
-               
             } else {
                 socket.emit('newQuestion', 'Nincs elérhető kérdés.');
             }
         });
     };
- 
+
     // Az első kérdés elküldése azonnal
     getNewQuestion();
-   
-   
-   
+
+    let questionCounter = 0;
+    let userScores = {};
+    const questionTime = 5; // Kérdésenkénti időkeret (másodperc)
+
     // 5 másodpercenként új kérdés lekérése
-    const intervalId =setInterval(getNewQuestion, 2000);
+    const intervalId = setInterval(getNewQuestion, 5000);
+
    
     // Felhasználó lecsatlakozása esetén az időzítő törlése
     socket.on('disconnect', () => {

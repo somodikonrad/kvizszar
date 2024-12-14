@@ -3,6 +3,7 @@ const newAnswerField = document.querySelector('#newAnswer');
     const questionElement = document.querySelector('#question');
     const playerList = document.querySelector('#playerList');
     const exitQuizBtn = document.querySelector('#exitQuizBtn');
+    const countdownElement = document.getElementById('countdown');
  
  
     const socket = io();
@@ -30,9 +31,16 @@ const newAnswerField = document.querySelector('#newAnswer');
        
         window.location.href = data.redirect; // Visszairányít az index.ejs oldalra
     });
+
     // Kérdés fogadása
-    socket.on('newQuestion', (questionText) => {
-        displayQuestion(questionText);
+    socket.on('newQuestion', (data) => {
+        questionElement.textContent = data.question;
+        countdownElement.textContent = `Hátralévő idő: ${data.time} másodperc`;
+    });
+    
+    // Visszaszámláló frissítése
+    socket.on('countdown', (timeRemaining) => {
+        countdownElement.textContent = `Hátralévő idő: ${timeRemaining} másodperc`;
     });
  
     // Válasz beküldése
